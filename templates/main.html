@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        {% block extra_css %}{% endblock %}
+        <title>{{ title }}</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+        
+        <style type="text/css">
+            html, body{
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            #animation_box {
+                width: 600px;
+                height: 200px;
+                position: relative;
+                background: #DFDFDF;
+                margin:auto;
+                }
+            #car {
+                /* width: 100px; */
+                position: absolute;
+                }
+            #warning_zone {
+                /* width: 100px; */
+                position: absolute;
+                background-color: yellow;
+                }
+            #safety_zone {
+                /* width: 100px; */
+                position: absolute;
+                background-color: red;
+                }
+            #object {
+                position: absolute;
+                height: 20px;
+                width: 20px;
+                background-color: green;
+            }
+            .indicator_icon {
+                height: 15px;
+                width: 15px;
+                background-color: grey;
+                border-radius: 50%;
+                display: inline-block;
+            }
+            #indicators {
+                background: #D4E6F1;
+                margin: 20px 10px 15px 10px;
+                padding: 10px;
+                /* margin-bottom: 20px; */
+            }
+            .btn {
+                margin: 2px;
+            }
+        </style>
+        {% block style %}{% endblock %}
+    </head>
+    <body>
+        <script src="{{ url_for('static', filename='js/Scenario.js') }}"></script>
+        <script type="text/javascript">
+            let demo = new DemoControl();
+        </script>
+        <div class="container-fluid top">
+        <div class="row">
+            <div class="container col-sm-2" id="scenario_controls">
+                <h3>Scenario Controls</h3>
+                <div id="scenario_buttons" style="width: 100%;" >
+                    <button type="button" class="btn btn-success btn-sm btn-block" onclick="demo.begin_scenario()">Begin/Refresh</button>
+                    <button type="button" class="btn btn-primary btn-sm btn-block" onclick="demo.sc_place_object_wz()">Place Object: Warning Zone</button>
+                    <button type="button" class="btn btn-primary btn-sm btn-block" onclick="demo.sc_place_object_sz()">Place Object: Safety Zone</button>
+                    <button type="button" class="btn btn-primary btn-sm btn-block" onclick="demo.sc_remove_object()">Remove Object</button>
+                </div>
+            </div>
+            <div class="container col-sm-8" id="draw_space">two</div>
+            <div class="container col-sm-2" id="driver_controls">
+                <h3>Driver Controls</h3>
+                <div id="control_buttons" style="width: 100%;" >
+                    <button type="button" class="btn btn-primary btn-sm btn-block" onclick="demo.dc_gear('Reverse')">Set Gear: Reverse</button>
+                    <button type="button" class="btn btn-primary btn-sm btn-block" onclick="demo.dc_gear('Park')">Set Gear: Park</button>
+                    <button type="button" class="btn btn-primary btn-sm btn-block" onclick="demo.dc_reverse()">Drive Backward</button>
+                    <button type="button" class="btn btn-primary btn-sm btn-block" onclick="demo.dc_release()">Release ABOA (depress brake)</button>
+                </div>
+            </div>
+        </div>
+        </div>
+        
+    </body>
+</html>
