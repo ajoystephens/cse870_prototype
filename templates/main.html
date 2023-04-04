@@ -20,7 +20,6 @@
                 width: 600px;
                 height: 200px;
                 position: relative;
-                background: #DFDFDF;
                 margin:auto;
                 }
             #car {
@@ -66,6 +65,9 @@
         <script src="{{ url_for('static', filename='js/Scenario.js') }}"></script>
         <script type="text/javascript">
             let demo = new DemoControl();
+            setTimeout(function(){
+                demo.begin_scenario()
+            }, 30);
         </script>
         <div class="container-fluid top">
         <div class="row">
@@ -76,9 +78,11 @@
                     <button type="button" class="btn btn-primary btn-sm btn-block" onclick="demo.sc_place_object_wz()">Place Object: Warning Zone</button>
                     <button type="button" class="btn btn-primary btn-sm btn-block" onclick="demo.sc_place_object_sz()">Place Object: Safety Zone</button>
                     <button type="button" class="btn btn-primary btn-sm btn-block" onclick="demo.sc_remove_object()">Remove Object</button>
+                    <button type="button" class="btn btn-primary btn-sm btn-block" onclick="demo.sc_toggle_traction()">Toggle Low Traction</button>
+                    <button type="button" class="btn btn-primary btn-sm btn-block" onclick="demo.sc_push_update()">Push PBAS Update</button>
                 </div>
             </div>
-            <div class="container col-sm-8" id="draw_space">two</div>
+            <div class="container col-sm-8" id="draw_space">Press "Begin/Refresh" to start the prototype</div>
             <div class="container col-sm-2" id="driver_controls">
                 <h3>Driver Controls</h3>
                 <div id="control_buttons" style="width: 100%;" >
@@ -86,6 +90,8 @@
                     <button type="button" class="btn btn-primary btn-sm btn-block" onclick="demo.dc_gear('Park')">Set Gear: Park</button>
                     <button type="button" class="btn btn-primary btn-sm btn-block" onclick="demo.dc_reverse()">Drive Backward</button>
                     <button type="button" class="btn btn-primary btn-sm btn-block" onclick="demo.dc_release()">Release ABOA (depress brake)</button>
+                    <button type="button" class="btn btn-primary btn-sm btn-block" onclick="demo.dc_disable_aboa()">Manually Disable ABOA</button>
+                    <button type="button" class="btn btn-primary btn-sm btn-block" onclick="demo.dc_enable_aboa()">Manually Enable ABOA</button>
                 </div>
             </div>
         </div>

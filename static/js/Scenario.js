@@ -13,6 +13,12 @@ class DemoControl {
     dc_release(){
         this.scenario.release_aboa();
     }
+    dc_enable_aboa(){
+        this.scenario.manual_aboa_control(true);
+    }
+    dc_disable_aboa(){
+        this.scenario.manual_aboa_control(false);
+    }
     dc_gear(new_gear){
         this.scenario.change_gear(new_gear);
     }
@@ -25,12 +31,18 @@ class DemoControl {
     sc_remove_object(){
         this.scenario.remove_object();
     }
+    sc_toggle_traction(){
+        this.scenario.toggle_traction();
+    }
+    sc_push_update(){
+        this.scenario.push_update();
+    }
 }
 
 class Scenario {
     constructor(){
         this.animation_box_size = [600,200];
-        this.car = new Car(this.animation_box_size[0]-110,this.animation_box_size[1]/2);
+        this.car = new Car(this.animation_box_size[0]-110,(this.animation_box_size[1]/2)-25);
         // console.log("Scenario: "+key);
         // this.is_object = true;
         // this.object_pos = this.car.get_pos_in_warning_zone()
@@ -64,6 +76,19 @@ class Scenario {
         this.#draw_driver_indicators();
     }
 
+    manual_aboa_control(is_enable){
+        this.car.aboa_is_manual_off = !is_enable;
+        this.car.sense_things(this.is_object,this.object_pos);
+        this.#draw_scenario();
+        this.#draw_driver_indicators();
+    }
+
+    toggle_traction(){
+        this.car.is_low_traction = !this.car.is_low_traction;
+        this.car.sense_things(this.is_object,this.object_pos);
+        this.#draw_scenario();
+        this.#draw_driver_indicators();
+    }
     place_object_wz(){
         this.is_object = true;
         this.object_pos = this.car.get_pos_in_warning_zone()
@@ -78,12 +103,20 @@ class Scenario {
     }
     remove_object(){
         this.is_object = false;
+        this.car.sense_things(this.is_object,this.object_pos);
+        this.#draw_driver_indicators();
         this.#draw_scenario();
     }
     release_aboa(){
         this.car.speed = 0;
         this.car.is_aboa_intervention = false;
         this.car.sense_things(this.is_object,this.object_pos);
+        this.#draw_driver_indicators();
+    }
+
+    push_update(){
+        this.car.is_pending_update = true;
+        this.car.try_install_update();
         this.#draw_driver_indicators();
     }
 
@@ -98,6 +131,12 @@ class Scenario {
         const dom_box = document.getElementById("animation_box");
         dom_box.style.width = this.animation_box_size[0] + "px"; 
         dom_box.style.height = this.animation_box_size[1] + "px";
+
+        if (this.car.is_low_traction){
+            dom_box.style.background = "#B3E5FC";
+        } else {
+            dom_box.style.background = "#DFDFDF";
+        }
 
         this.#draw_car()
         this.#draw_driver_indicators()
@@ -130,6 +169,11 @@ class Scenario {
         if (this.car.is_aboa_on){color='green'}
         dom_aboa_ind.style.color = color
 
+        const dom_aboa_ind_lt = document.getElementById("aboa_indicator_lt");
+        color = 'gray';
+        if (this.car.is_aboa_on){color='green'}
+        dom_aboa_ind_lt.style.color = color
+
         const dom_aboa_eng_ind = document.getElementById("aboa_engage_indicator");
         color = 'gray';
         if (this.car.is_aboa_intervention){color='green'}
@@ -139,6 +183,28 @@ class Scenario {
         color = 'gray';
         if (this.car.cam_is_on){color='green'}
         dom_cam_ind.style.color = color
+
+        const dom_pbas_update_pend = document.getElementById("pbas_update_pending");
+        color = 'gray';
+        if (this.car.is_pending_update){color='green'}
+        dom_pbas_update_pend.style.color = color
+
+        const dom_pbas_update_inst = document.getElementById("pbas_update_install");
+        color = 'gray';
+        if (this.car.is_installing_update){
+            color='green';
+
+            const that = this;
+            let id = null;
+            id = setInterval(check_update_finished,100)
+            function check_update_finished() {
+                if (!that.car.is_installing_update){
+                    that.#draw_driver_indicators();
+                    clearInterval(id); // stop waiting
+                }
+              }
+        }
+        dom_pbas_update_inst.style.color = color;
 
     }
     #draw_car(){
@@ -163,9 +229,11 @@ class Scenario {
     }
     #get_animation_box_html(){
         var inner_html = "<div id='animation_box'>";
-        inner_html += "text animation box";
+        // inner_html += "text animation box";
         // inner_html += "<div id ='car'><img id='car_img' src='/static/img/car.png'></div>";
-        inner_html += "<img id='car' src='/static/img/car.png'>";
+        // inner_html += "<img id='car' src='/static/img/car.png'>";
+        inner_html += "<img id='car' src='/static/img/car_2.png'>";
+        // inner_html += "<img id='car' src='https://www.clipartmax.com/png/small/65-652536_race-car-top-down-clipart-png-car-top-of-view.png' alt='Race Car Top Down Clipart - Png Car Top Of View'>"
         inner_html += "<div id ='warning_zone'></div>";
         inner_html += "<div id ='safety_zone'></div>";
         if (this.is_object){
@@ -190,12 +258,20 @@ class Scenario {
         inner_html += "</br>";
         inner_html += "ABOA Engaged Status: ";
         inner_html += "<i id='aboa_engage_indicator' class='bi bi-circle-fill style='color:#03A9F4; font-size:12px;></i>";
-        // inner_html += "</br>";
+        inner_html += "</br>";
+        inner_html += "PBAS Update Pending: ";
+        inner_html += "<i id='pbas_update_pending' class='bi bi-circle-fill style='color:#03A9F4; font-size:12px;></i>";
+        inner_html += "</br>";
+        inner_html += "PBAS Update Installing: ";
+        inner_html += "<i id='pbas_update_install' class='bi bi-circle-fill style='color:#03A9F4; font-size:12px;></i>";
         inner_html += "</div>"; // close col 2
         inner_html += "<div class='container col-sm-6'>";
         // inner_html += "<i id='aboa_indicator' class='bi bi-circle-fill style='color:#03A9F4; font-size:12px;></i>";
         inner_html += "Camera Display: ";
         inner_html += "<i id='cam_indicator' class='bi bi-circle-fill style='color:#03A9F4; font-size:12px;></i>";
+        inner_html += "</br>";
+        inner_html += "ABOA Indicator Light: ";
+        inner_html += "<i id='aboa_indicator_lt' class='bi bi-circle-fill style='color:#03A9F4; font-size:12px;></i>";
         inner_html += "</br>";
         inner_html += "Audible Alert: ";
         inner_html += "<i id='alert_indicator' class='bi bi-circle-fill style='color:#03A9F4; font-size:12px;></i>";
@@ -215,12 +291,12 @@ class Car {
         this.width = 100;
         this.wz_width = 200;
         this.sz_width = 50;
-        this.z_height = 40;
+        this.z_height = 50;
         this.gear = "Park";
         this.is_aboa_on = false;
         this.cam_is_on = false;
         this.pbas_alert_is_on = false;
-        this.aboa_is_manuall_off = false;
+        this.aboa_is_manual_off = false;
         this.is_low_traction = false;
         this.is_low_speed = true;
         this.is_sensor_working = true;
@@ -228,21 +304,37 @@ class Car {
         this.y_pos = initial_y;
         this.is_aboa_intervention = false;
         this.is_pbas_on = false;
+        this.is_pending_update = false;
+        this.is_installing_update = false;
+
 
         console.log("I made a car!");
     }
     change_gear(new_gear){
-        if (new_gear == 'Park' || new_gear == "Reverse"){this.gear = new_gear}
-
-        if (this.gear == 'Reverse'){
+        // if (new_gear == 'Park' || new_gear == "Reverse"){this.gear = new_gear}
+        // console.log('is_installing_update: '+this.is_installing_update)
+        if (new_gear == 'Reverse' && !this.is_installing_update){
+            this.gear = 'Reverse';
             this.is_pbas_on = true;
             this.cam_is_on = true;
-        } else {
+        } else if (new_gear == 'Park') {
+            this.gear = 'Park'
             this.is_pbas_on = false;
             this.cam_is_on = false;
         }
+        this.try_install_update();
 
         this.#try_enable_aboa();
+    }
+    try_install_update(){
+        const that = this;
+        if (this.gear == 'Park' && this.is_pending_update){
+            this.is_installing_update = true;
+            setTimeout(function(){
+                that.is_installing_update = false;
+                that.is_pending_update = false;
+            }, 3000);
+        }
     }
     move(){
         let can_move = (this.gear != 'Park')
@@ -296,7 +388,7 @@ class Car {
     }
     #try_enable_aboa(){
         if (this.gear == 'Reverse'
-            && !this.aboa_is_manuall_off
+            && !this.aboa_is_manual_off
             && this.is_low_speed
             && !this.is_low_traction
             && this.is_sensor_working
