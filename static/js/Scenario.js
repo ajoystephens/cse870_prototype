@@ -401,13 +401,18 @@ class Car {
     sense_things(is_object,object_pos){
         this.#try_enable_aboa();
         if (this.is_pbas_on && this.is_sensor_working && is_object){
-            if (this.#is_obj_in_wz(object_pos)){
+            const is_wz = this.#is_obj_in_wz(object_pos);
+            const is_sz = this.#is_obj_in_sz(object_pos);
+            if (is_wz){
                 this.pbas_alert_is_on = true;
             }
-            if (this.#is_obj_in_sz(object_pos)){
+            if (is_sz){
                 this.pbas_alert_is_on = true;
                 if (this.is_aboa_on){this.is_aboa_intervention = true;}
                 
+            }
+            if (!is_wz && !is_sz){
+                this.pbas_alert_is_on = false;
             }
 
         }
