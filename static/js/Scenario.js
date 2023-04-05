@@ -415,6 +415,8 @@ class Car {
                 this.pbas_alert_is_on = false;
             }
 
+        } else {
+            this.pbas_alert_is_on = false;
         }
     }
     #is_obj_in_wz(object_pos){
