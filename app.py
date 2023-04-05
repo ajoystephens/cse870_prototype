@@ -2,7 +2,7 @@ from flask import Flask, render_template, jsonify, request, redirect,url_for
 
 
 
-DEBUG = True
+DEBUG = False
 
 app = Flask(__name__)
 
