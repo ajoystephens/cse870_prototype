@@ -407,11 +407,11 @@ class Car {
                 this.pbas_alert_is_on = true;
             }
             if (is_sz){
-                this.pbas_alert_is_on = true;
+                // this.pbas_alert_is_on = true;
                 if (this.is_aboa_on){this.is_aboa_intervention = true;}
                 
             }
-            if (!is_wz && !is_sz){
+            if (!is_wz){
                 this.pbas_alert_is_on = false;
             }
 
